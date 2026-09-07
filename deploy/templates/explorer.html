@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Explorer | Real-Time Airfare Price Index | MoSPI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Explorer-specific styles ── */
+    .explorer-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border-top: 4px solid var(--navy);
+      padding: 20px;
+      position: sticky;
+      top: 60px;
+    }
+
+    .sidebar h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .sidebar-group { margin-bottom: 20px; }
+
+    .sidebar-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-group select,
+    .sidebar-group input[type="date"],
+    .sidebar-group input[type="range"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--gray-800);
+      background: var(--white);
+      outline: none;
+    }
+
+    .sidebar-group select:focus,
+    .sidebar-group input:focus {
+      border-color: var(--navy-light);
+      box-shadow: 0 0 0 2px rgba(37,80,160,0.12);
+    }
+
+    .checkbox-list { display: flex; flex-direction: column; gap: 7px; }
+
+    .checkbox-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--gray-800);
+      text-transform: none;
+      cursor: pointer;
+    }
+
+    .checkbox-list input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; }
+
+    .sidebar-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+
+    .results-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    .result-summary {
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+      color: var(--white);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .result-summary p { font-size: 14px; opacity: 0.85; }
+    .result-summary strong { font-size: 22px; font-weight: 700; color: var(--saffron); }
+
+    .tab-bar {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-100);
+    }
+
+    .tab-btn {
+      padding: 13px 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--gray-600);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover { color: var(--navy); background: rgba(26,58,107,0.05); }
+    .tab-btn.active { color: var(--navy-dark); border-bottom-color: var(--saffron); background: var(--white); }
+
+    .tab-pane { display: none; padding: 20px; }
+    .tab-pane.active { display: block; }
+
+    .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+    .mini-chart-card {
+      background: var(--gray-100);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .mini-chart-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      margin-bottom: 12px;
+    }
+
+    .download-panel {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      border-top: 4px solid var(--green);
+    }
+
+    .download-panel h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      margin-bottom: 14px;
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .download-item {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: box-shadow var(--transition);
+    }
+
+    .download-item:hover { box-shadow: var(--shadow-md); }
+
+    .download-item .file-icon { font-size: 28px; }
+    .download-item .file-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+    .download-item .file-meta { font-size: 11px; color: var(--gray-400); }
+    .download-item a {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy-light);
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-box {
+      background: var(--gray-100);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+      border: 1px solid var(--gray-200);
+    }
+
+    .stat-box .stat-val { font-size: 22px; font-weight: 700; color: var(--navy-dark); }
+    .stat-box .stat-lbl { font-size: 11px; color: var(--gray-600); margin-top: 3px; }
+
+    @media (max-width: 960px) {
+      .explorer-layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .charts-2col { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── UTILITY BAR ── -->
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <div class="utility-left">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem of India" class="emblem" />
+        <span>Government of India &nbsp;|&nbsp; Ministry of Statistics &amp; Programme Implementation</span>
+      </div>
+      <div class="utility-right">
+        <a href="#">Screen Reader Access</a>
+        <span class="divider">|</span>
+        <button class="font-btn" onclick="changeFontSize(1)">A+</button>
+        <button class="font-btn" onclick="changeFontSize(0)">A</button>
+        <button class="font-btn" onclick="changeFontSize(-1)">A-</button>
+        <span class="divider">|</span>
+        <button class="lang-btn active" id="lang-en">English</button>
+        <button class="lang-btn" id="lang-hi">हिन्दी</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SITE HEADER ── -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="India Emblem" class="header-emblem" />
+        <div class="header-title-block">
+          <h1 class="header-title">Real-Time Airfare Price Index</h1>
+          <p class="header-subtitle">Ministry of Statistics &amp; Programme Implementation &nbsp;·&nbsp; Government of India</p>
+          <p class="header-tag">Augmenting the Consumer Price Index (CPI) · SIH 2026 | Problem No. 26056</p>
+        </div>
+      </div>
+      <div class="header-logos">
+        <div class="digital-india-badge">
+          <span class="di-top">Digital</span>
+          <span class="di-bottom">India</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── TRICOLOR STRIPE ── -->
+  <div class="tricolor-stripe">
+    <div class="stripe saffron"></div>
+    <div class="stripe white"></div>
+    <div class="stripe green"></div>
+  </div>
+
+  <!-- ── NAV ── -->
+  <nav class="main-nav" role="navigation" aria-label="Main Navigation">
+    <div class="container">
+      <button class="hamburger" onclick="toggleMenu()">☰ Menu</button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/explorer" class="active">Data Explorer</a></li>
+        <li><a href="/methodology">Methodology</a></li>
+        <li><a href="index.html#routes">Route Analysis</a></li>
+        <li><a href="index.html#airlines">Airline Index</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── BREADCRUMB ── -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <a href="/">🏠 Home</a> &rsaquo; <span>Data Explorer</span>
+    </div>
+  </div>
+
+  <!-- ── PAGE HERO ── -->
+  <section class="page-hero">
+    <div class="container">
+      <h1>Data Explorer</h1>
+      <p>Explore, filter, and download airfare index data by route, airline, date range, and travel class</p>
+    </div>
+  </section>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main-content" id="main-content">
+    <div class="container">
+      <div class="explorer-layout">
+
+        <!-- ── SIDEBAR FILTERS ── -->
+        <aside class="sidebar" aria-label="Filter controls">
+          <h3>🔍 Filter Data</h3>
+
+          <div class="sidebar-group">
+            <label for="filter-route">Route</label>
+            <select id="filter-route">
+              <option value="all">All Routes (52)</option>
+              <option>DEL – BOM (Delhi ↔ Mumbai)</option>
+              <option>DEL – BLR (Delhi ↔ Bengaluru)</option>
+              <option>BOM – MAA (Mumbai ↔ Chennai)</option>
+              <option>DEL – HYD (Delhi ↔ Hyderabad)</option>
+              <option>BLR – CCU (Bengaluru ↔ Kolkata)</option>
+              <option>DEL – CCU (Delhi ↔ Kolkata)</option>
+              <option>BOM – GOI (Mumbai ↔ Goa)</option>
+              <option>DEL – JAI (Delhi ↔ Jaipur)</option>
+              <option>HYD – MAA (Hyderabad ↔ Chennai)</option>
+              <option>BOM – PNQ (Mumbai ↔ Pune)</option>
+            </select>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="filter-class">Travel Class</label>
+            <select id="filter-class">
+              <option value="economy">Economy (All-inclusive)</option>
+              <option value="business">Business</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="filter-from">Date From</label>
+            <input type="date" id="filter-from" value="2026-03-01" />
+          </div>
+
+          <div class="sidebar-group">
+            <label for="filter-to">Date To</label>
+            <input type="date" id="filter-to" value="2026-09-07" />
+          </div>
+
+          <div class="sidebar-group">
+            <label>Airlines</label>
+            <div class="checkbox-list">
+              <label><input type="checkbox" checked /> IndiGo (6E)</label>
+              <label><input type="checkbox" checked /> Air India (AI)</label>
+              <label><input type="checkbox" checked /> SpiceJet (SG)</label>
+              <label><input type="checkbox" checked /> Vistara (UK)</label>
+              <label><input type="checkbox" checked /> Akasa Air (QP)</label>
+              <label><input type="checkbox" checked /> AI Express (IX)</label>
+            </div>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="filter-window">Booking Window (days)</label>
+            <input type="range" id="filter-window" min="1" max="60" value="14"
+              oninput="document.getElementById('window-val').textContent = this.value + ' days'" />
+            <span id="window-val" style="font-size:12px;color:var(--gray-600);">14 days</span>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="filter-tier">Route Tier</label>
+            <select id="filter-tier">
+              <option value="all">All Tiers</option>
+              <option value="1">Tier 1 — Metro-Metro</option>
+              <option value="2">Tier 2 — Metro–Tier1</option>
+              <option value="3">Tier 3 — Regional</option>
+            </select>
+          </div>
+
+          <div class="sidebar-actions">
+            <button class="btn-primary" onclick="applyFilters()">Apply Filters</button>
+            <button class="btn-secondary" onclick="resetFilters()">Reset</button>
+          </div>
+        </aside>
+
+        <!-- ── RESULTS PANEL ── -->
+        <div class="results-panel">
+
+          <!-- Summary strip -->
+          <div class="result-summary">
+            <div>
+              <p>Showing results for: <strong>All Routes · Economy · Mar–Sep 2026</strong></p>
+              <p style="font-size:12px;margin-top:3px;">Last updated: 07 Sep 2026, 06:00 IST &nbsp;|&nbsp; Data freshness: ✅ Current</p>
+            </div>
+            <div style="text-align:right;">
+              <strong id="explorer-nai">142.7</strong>
+              <p style="font-size:12px;margin-top:2px;">National Airfare Index</p>
+            </div>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="stat-val">52</div>
+              <div class="stat-lbl">Routes in Dataset</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">186</div>
+              <div class="stat-lbl">Days of Data</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val" style="color:var(--green);">+9.7%</div>
+              <div class="stat-lbl">YoY Change (NAI)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">₹4,832</div>
+              <div class="stat-lbl">Avg Economy Fare (14d)</div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tab-bar">
+            <div class="tab-nav" role="tablist">
+              <button class="tab-btn active" onclick="switchTab('trend', this)" role="tab" aria-selected="true">📈 Index Trend</button>
+              <button class="tab-btn" onclick="switchTab('compare', this)" role="tab" aria-selected="false">🔀 Airline Compare</button>
+              <button class="tab-btn" onclick="switchTab('booking', this)" role="tab" aria-selected="false">📅 Booking Window</button>
+              <button class="tab-btn" onclick="switchTab('table', this)" role="tab" aria-selected="false">📋 Data Table</button>
+            </div>
+
+            <!-- TAB 1: Trend -->
+            <div class="tab-pane active" id="tab-trend" role="tabpanel">
+              <canvas id="explorerTrend" height="90"></canvas>
+            </div>
+
+            <!-- TAB 2: Airline Compare -->
+            <div class="tab-pane" id="tab-compare" role="tabpanel">
+              <canvas id="heatmapChart" height="110"></canvas>
+            </div>
+
+            <!-- TAB 3: Booking Window Scatter -->
+            <div class="tab-pane" id="tab-booking" role="tabpanel">
+              <p style="font-size:13px;color:var(--gray-600);margin-bottom:12px;">
+                Relationship between booking lead time (days before departure) and observed fare index value.
+                Shorter lead times generally correspond to higher index values.
+              </p>
+              <canvas id="scatterChart" height="110"></canvas>
+            </div>
+
+            <!-- TAB 4: Data Table -->
+            <div class="tab-pane" id="tab-table" role="tabpanel">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <input type="search" placeholder="Search route or airline…" style="padding:7px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;width:220px;outline:none;" />
+                <div style="display:flex;gap:8px;">
+                  <a href="#" class="btn-download" style="font-size:12px;padding:6px 12px;">⬇ CSV</a>
+                  <a href="#" class="btn-download" style="font-size:12px;padding:6px 12px;background:var(--green);">⬇ JSON</a>
+                  <a href="#" class="btn-download" style="font-size:12px;padding:6px 12px;background:var(--saffron-dk);">⬇ Excel</a>
+                </div>
+              </div>
+              <div class="table-wrapper" style="max-height:360px;overflow-y:auto;" tabindex="0">
+                <table class="data-table" id="explorer-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Route</th>
+                      <th>Airline</th>
+                      <th>Class</th>
+                      <th>Fare (₹)</th>
+                      <th>Index</th>
+                      <th>Booking Window</th>
+                      <th>Source</th>
+                    </tr>
+                  </thead>
+                  <tbody id="explorer-tbody">
+                    <!-- rows injected by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <p style="font-size:12px;color:var(--gray-400);margin-top:8px;">Showing 20 of 9,672 records. Use filters to narrow results.</p>
+            </div>
+          </div>
+
+          <!-- Download Panel -->
+          <div class="download-panel">
+            <h3>📦 Download Datasets</h3>
+            <div class="download-grid">
+              <div class="download-item">
+                <span class="file-icon">📊</span>
+                <span class="file-name">Daily NAI (2026)</span>
+                <span class="file-meta">CSV · 248 KB · Updated daily</span>
+                <a href="#">Download ↓</a>
+              </div>
+              <div class="download-item">
+                <span class="file-icon">📊</span>
+                <span class="file-name">Route-wise Index</span>
+                <span class="file-meta">CSV · 1.4 MB · Monthly</span>
+                <a href="#">Download ↓</a>
+              </div>
+              <div class="download-item">
+                <span class="file-icon">📋</span>
+                <span class="file-name">Raw Fare Records</span>
+                <span class="file-meta">CSV · 18 MB · Weekly</span>
+                <a href="#">Download ↓</a>
+              </div>
+              <div class="download-item">
+                <span class="file-icon">🔧</span>
+                <span class="file-name">API Documentation</span>
+                <span class="file-meta">PDF · 380 KB</span>
+                <a href="#">Download ↓</a>
+              </div>
+              <div class="download-item">
+                <span class="file-icon">📄</span>
+                <span class="file-name">Methodology Note</span>
+                <span class="file-meta">PDF · 520 KB</span>
+                <a href="/methodology">View →</a>
+              </div>
+              <div class="download-item">
+                <span class="file-icon">🗃️</span>
+                <span class="file-name">Full Archive (ZIP)</span>
+                <span class="file-meta">ZIP · 54 MB · All-time</span>
+                <a href="#">Download ↓</a>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /results-panel -->
+      </div><!-- /explorer-layout -->
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="container footer-top-inner">
+        <div class="footer-col">
+          <h4>About the Portal</h4>
+          <p>Real-Time Airfare Price Index developed under SIH 2026 (Problem No. SIH26056) in collaboration with MoSPI.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/explorer">Data Explorer</a></li>
+            <li><a href="/methodology">Methodology</a></li>
+            <li><a href="#">API Access</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Related Portals</h4>
+          <ul>
+            <li><a href="https://mospi.gov.in" target="_blank" rel="noopener">MoSPI Official Website</a></li>
+            <li><a href="https://sih.gov.in" target="_blank" rel="noopener">Smart India Hackathon</a></li>
+            <li><a href="https://data.gov.in" target="_blank" rel="noopener">Open Government Data</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <address>
+            <p>Ministry of Statistics &amp; Programme Implementation</p>
+            <p>Sardar Patel Bhawan, New Delhi – 110001</p>
+            <p>📧 airindex@mospi.gov.in</p>
+          </address>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>© 2026 Ministry of Statistics &amp; Programme Implementation, Government of India. All Rights Reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Terms &amp; Conditions</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Disclaimer</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    /* ── TAB SWITCHING ── */
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    /* ── FILTER STUBS ── */
+    function applyFilters() {
+      const route   = document.getElementById('filter-route').value;
+      const cls     = document.getElementById('filter-class').value;
+      const from    = document.getElementById('filter-from').value;
+      const to      = document.getElementById('filter-to').value;
+      const win     = document.getElementById('filter-window').value;
+      // In production this would re-query the API
+      console.log('Filters applied:', { route, cls, from, to, win });
+      alert('Filters applied! In production, charts and tables would refresh from the API.');
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-route').value   = 'all';
+      document.getElementById('filter-class').value   = 'economy';
+      document.getElementById('filter-from').value    = '2026-03-01';
+      document.getElementById('filter-to').value      = '2026-09-07';
+      document.getElementById('filter-window').value  = '14';
+      document.getElementById('window-val').textContent = '14 days';
+    }
+
+    /* ── SAMPLE TABLE ROWS ── */
+    const SAMPLE_ROWS = [
+      ['07-Sep-26','DEL–BOM','IndiGo','Economy','₹4,312','158.4','14 days','MakeMyTrip'],
+      ['07-Sep-26','BOM–GOI','Air India','Economy','₹5,108','162.7','14 days','IndiGo.com'],
+      ['07-Sep-26','DEL–BLR','Vistara','Economy','₹4,780','147.2','14 days','Cleartrip'],
+      ['07-Sep-26','DEL–HYD','SpiceJet','Economy','₹3,940','144.8','14 days','Ixigo'],
+      ['06-Sep-26','DEL–BOM','Akasa Air','Economy','₹4,120','156.9','14 days','EaseMyTrip'],
+      ['06-Sep-26','BOM–MAA','IndiGo','Economy','₹3,620','139.5','14 days','IndiGo.com'],
+      ['06-Sep-26','HYD–MAA','Air India','Economy','₹2,980','131.6','14 days','AI.com'],
+      ['06-Sep-26','DEL–CCU','SpiceJet','Economy','₹3,810','136.9','14 days','MakeMyTrip'],
+      ['05-Sep-26','BLR–CCU','IndiGo','Economy','₹3,520','132.1','14 days','Cleartrip'],
+      ['05-Sep-26','BOM–PNQ','Akasa Air','Economy','₹2,440','119.3','14 days','Ixigo'],
+      ['05-Sep-26','DEL–BOM','Air India','Business','₹12,800','198.2','14 days','AI.com'],
+      ['05-Sep-26','DEL–JAI','IndiGo','Economy','₹2,680','128.4','14 days','EaseMyTrip'],
+      ['04-Sep-26','DEL–BOM','IndiGo','Economy','₹4,150','155.2','14 days','IndiGo.com'],
+      ['04-Sep-26','BOM–GOI','SpiceJet','Economy','₹4,920','158.4','14 days','SpiceJet.com'],
+      ['04-Sep-26','DEL–BLR','Akasa Air','Economy','₹4,610','142.8','7 days','Ixigo'],
+      ['03-Sep-26','DEL–HYD','Vistara','Economy','₹4,560','143.1','7 days','Cleartrip'],
+      ['03-Sep-26','BOM–MAA','IndiGo','Economy','₹3,580','138.9','7 days','MakeMyTrip'],
+      ['03-Sep-26','DEL–CCU','Air India','Economy','₹3,990','135.8','30 days','AI.com'],
+      ['02-Sep-26','DEL–BOM','SpiceJet','Economy','₹3,980','150.4','30 days','EaseMyTrip'],
+      ['02-Sep-26','HYD–MAA','IndiGo','Economy','₹2,820','129.8','30 days','IndiGo.com'],
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const tbody = document.getElementById('explorer-tbody');
+      if (tbody) {
+        SAMPLE_ROWS.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = row.map((cell, i) => {
+            if (i === 5) {
+              const val = parseFloat(cell);
+              return `<td style="font-weight:600;color:var(--navy-dark)">${cell}</td>`;
+            }
+            return `<td>${cell}</td>`;
+          }).join('');
+          tbody.appendChild(tr);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

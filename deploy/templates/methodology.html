@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Methodology | Real-Time Airfare Price Index | MoSPI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── UTILITY BAR ── -->
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <div class="utility-left">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem of India" class="emblem" />
+        <span>Government of India &nbsp;|&nbsp; Ministry of Statistics &amp; Programme Implementation</span>
+      </div>
+      <div class="utility-right">
+        <a href="#">Screen Reader Access</a>
+        <span class="divider">|</span>
+        <button class="font-btn" onclick="changeFontSize(1)">A+</button>
+        <button class="font-btn" onclick="changeFontSize(0)">A</button>
+        <button class="font-btn" onclick="changeFontSize(-1)">A-</button>
+        <span class="divider">|</span>
+        <button class="lang-btn active" id="lang-en">English</button>
+        <button class="lang-btn" id="lang-hi">हिन्दी</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SITE HEADER ── -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="India Emblem" class="header-emblem" />
+        <div class="header-title-block">
+          <h1 class="header-title">Real-Time Airfare Price Index</h1>
+          <p class="header-subtitle">Ministry of Statistics &amp; Programme Implementation &nbsp;·&nbsp; Government of India</p>
+          <p class="header-tag">Augmenting the Consumer Price Index (CPI) · SIH 2026 | Problem No. 26056</p>
+        </div>
+      </div>
+      <div class="header-logos">
+        <div class="digital-india-badge">
+          <span class="di-top">Digital</span>
+          <span class="di-bottom">India</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── TRICOLOR STRIPE ── -->
+  <div class="tricolor-stripe">
+    <div class="stripe saffron"></div>
+    <div class="stripe white"></div>
+    <div class="stripe green"></div>
+  </div>
+
+  <!-- ── NAV ── -->
+  <nav class="main-nav" role="navigation" aria-label="Main Navigation">
+    <div class="container">
+      <button class="hamburger" onclick="toggleMenu()">☰ Menu</button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/explorer">Data Explorer</a></li>
+        <li><a href="/methodology" class="active">Methodology</a></li>
+        <li><a href="index.html#routes">Route Analysis</a></li>
+        <li><a href="index.html#airlines">Airline Index</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── BREADCRUMB ── -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <a href="/">🏠 Home</a> &rsaquo; <span>Methodology</span>
+    </div>
+  </div>
+
+  <!-- ── PAGE HERO ── -->
+  <section class="page-hero">
+    <div class="container">
+      <h1>Methodology</h1>
+      <p>Data collection framework, index construction formula, and quality assurance protocols for the Real-Time Airfare Price Index</p>
+    </div>
+  </section>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main-content" id="main-content">
+    <div class="container">
+
+      <!-- 1. OVERVIEW -->
+      <div class="prose-section">
+        <h2>1. Overview</h2>
+        <p>The Real-Time Airfare Price Index (RAPI) is a statistical measure developed to track the price movement of domestic air travel in India. It is designed to serve as an input to the Air Transport sub-component of the Consumer Price Index (CPI), which is currently not captured at adequate frequency by MoSPI.</p>
+        <p>The index is constructed using automated web scraping of airline websites and Online Travel Aggregator (OTA) portals, processed through a standardized pipeline, and published daily. The methodology follows internationally accepted price index theory with adaptations suitable for the dynamic nature of airline pricing.</p>
+
+        <!-- Pipeline -->
+        <h3>Data Pipeline Overview</h3>
+        <div class="pipeline-steps">
+          <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-title">Web Scraping</span>
+          </div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-title">Raw Data Ingestion</span>
+          </div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-title">Cleaning &amp; Normalization</span>
+          </div>
+          <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-title">Price Matching</span>
+          </div>
+          <div class="step">
+            <span class="step-num">5</span>
+            <span class="step-title">Index Calculation</span>
+          </div>
+          <div class="step">
+            <span class="step-num">6</span>
+            <span class="step-title">Quality Check</span>
+          </div>
+          <div class="step">
+            <span class="step-num">7</span>
+            <span class="step-title">Publication</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. DATA SOURCES -->
+      <div class="prose-section">
+        <h2>2. Data Sources &amp; Coverage</h2>
+
+        <h3>2.1 Airline Portals (Direct)</h3>
+        <p>Fares are collected from official booking portals of all scheduled domestic carriers. Direct airline portals are treated as the primary source as they represent real transaction prices without intermediary markups.</p>
+        <ul>
+          <li>IndiGo (6E) — Market share ~58%</li>
+          <li>Air India (AI) — Full-service carrier</li>
+          <li>SpiceJet (SG) — Low-cost carrier</li>
+          <li>Vistara (UK) — Full-service carrier</li>
+          <li>Akasa Air (QP) — New entrant, low-cost</li>
+          <li>Air India Express (IX) — Low-cost subsidiary</li>
+        </ul>
+
+        <h3>2.2 Online Travel Aggregators (OTA)</h3>
+        <p>Four major OTA platforms are scraped to capture aggregate pricing and cross-airline comparison data:</p>
+        <ul>
+          <li>MakeMyTrip (MMT)</li>
+          <li>Cleartrip</li>
+          <li>Ixigo</li>
+          <li>EaseMyTrip</li>
+        </ul>
+
+        <h3>2.3 Route Coverage</h3>
+        <p>52 origin-destination (O-D) route pairs are covered, selected based on DGCA passenger traffic data. Routes are classified into three tiers:</p>
+        <ul>
+          <li><strong>Tier 1 (Metro-Metro):</strong> Delhi, Mumbai, Bengaluru, Chennai, Hyderabad, Kolkata — 15 routes</li>
+          <li><strong>Tier 2 (Metro-Tier1 City):</strong> 22 routes including Pune, Ahmedabad, Jaipur, Goa, Kochi</li>
+          <li><strong>Tier 3 (Regional):</strong> 15 routes covering smaller cities with significant traffic growth</li>
+        </ul>
+
+        <h3>2.4 Booking Window Standardization</h3>
+        <p>To ensure comparability, fares are collected for standardized advance purchase windows:</p>
+        <ul>
+          <li>1-day advance (last-minute pricing)</li>
+          <li>7-day advance</li>
+          <li>14-day advance</li>
+          <li>30-day advance (representative consumer booking)</li>
+          <li>60-day advance (early bird pricing)</li>
+        </ul>
+        <p>The <strong>14-day advance fare</strong> is used as the primary price observation, consistent with consumer purchase behavior surveys conducted by MoSPI (2022).</p>
+      </div>
+
+      <!-- 3. INDEX FORMULA -->
+      <div class="prose-section">
+        <h2>3. Index Construction</h2>
+
+        <h3>3.1 Base Period</h3>
+        <p>The index uses <strong>2016 as the base year (2016 = 100)</strong>, aligning with the existing CPI base year used by MoSPI. Base year prices are sourced from DGCA historical tariff filings and MoSPI's existing CPI household survey data for the Air Transport item.</p>
+
+        <h3>3.2 Price Concept</h3>
+        <p>The price observed is the <em>all-inclusive economy class fare</em> (base fare + airline fuel surcharge + airport development fee + UDAN levy + GST) for a single one-way ticket. Business class fares are tracked separately and published as a supplementary series.</p>
+
+        <h3>3.3 Laspeyres Price Index Formula</h3>
+        <p>The RAPI uses a modified Laspeyres-type formula, consistent with the methodology used for the CPI:</p>
+        <div class="formula-box">
+          RAPI<sub>t</sub> = Σ [ w<sub>i</sub> × (P<sub>i,t</sub> / P<sub>i,0</sub>) ] × 100
+
+          Where:
+          — RAPI<sub>t</sub>  = Index value at time t
+          — w<sub>i</sub>     = Weight of route i (based on DGCA passenger share, base year)
+          — P<sub>i,t</sub>   = Average fare on route i at time t
+          — P<sub>i,0</sub>   = Average fare on route i in base year 2016
+          — Σ w<sub>i</sub>   = 1 (weights sum to 1)
+        </div>
+
+        <h3>3.4 Route Weighting</h3>
+        <p>Route weights (w<sub>i</sub>) are derived from DGCA's annual domestic air traffic statistics and updated every 5 years in line with the CPI weight revision cycle. The current weights reflect 2021–22 DGCA traffic data.</p>
+
+        <h3>3.5 Airline Aggregation</h3>
+        <p>Within each route, fares from multiple airlines are aggregated using a <strong>market-share weighted average</strong>, where market shares are estimated from DGCA monthly seat capacity data:</p>
+        <div class="formula-box">
+          P<sub>i,t</sub> = Σ [ s<sub>j,i</sub> × p<sub>j,i,t</sub> ]
+
+          Where:
+          — s<sub>j,i</sub>   = Market share of airline j on route i
+          — p<sub>j,i,t</sub> = Scraped fare of airline j on route i at time t
+        </div>
+
+        <h3>3.6 Seasonal Adjustment</h3>
+        <p>A multiplicative seasonal adjustment factor (SAF) derived from 3 years of historical fare data is applied to produce a seasonally adjusted index series, published alongside the unadjusted series.</p>
+      </div>
+
+      <!-- 4. SCRAPING TECH -->
+      <div class="prose-section">
+        <h2>4. Web Scraping Technology</h2>
+
+        <h3>4.1 Architecture</h3>
+        <p>The scraping system is built on a distributed, fault-tolerant architecture to ensure 99.5%+ data availability:</p>
+        <ul>
+          <li>Orchestration: Apache Airflow — daily DAG scheduling at 01:00 IST</li>
+          <li>Scrapers: Python (Playwright + BeautifulSoup4) for dynamic and static pages</li>
+          <li>Anti-detection: Rotating proxies, randomized user agents, rate limiting (≤ 1 request/3 sec per domain)</li>
+          <li>Storage: PostgreSQL (structured fare data) + S3-compatible object store (raw HTML archives)</li>
+          <li>Processing: PySpark for large-scale fare normalization</li>
+          <li>API: FastAPI — serves cleaned index data to this portal</li>
+        </ul>
+
+        <h3>4.2 Data Validation Rules</h3>
+        <p>Every scraped record passes through automated validation before entering the index calculation:</p>
+        <ol>
+          <li>Fare must be a positive numeric value in INR</li>
+          <li>Route O-D pair must match one of the 52 monitored routes</li>
+          <li>Travel date must be within the defined booking window (1–60 days ahead)</li>
+          <li>Fare must be within ±3 standard deviations of the 30-day rolling average for that route (outlier detection)</li>
+          <li>Source page must return HTTP 200 within the scrape session</li>
+        </ol>
+
+        <h3>4.3 Missing Data Handling</h3>
+        <p>When a fare observation is missing for a route (scraper failure, airline website downtime), the following imputation hierarchy applies:</p>
+        <ol>
+          <li>Use fare from the alternate OTA source for the same route and date</li>
+          <li>Use the previous day's fare adjusted by the average daily change for that route</li>
+          <li>Flag as estimated in the published dataset; if missing for more than 3 consecutive days, the route is excluded from that period's index</li>
+        </ol>
+      </div>
+
+      <!-- 5. CPI INTEGRATION -->
+      <div class="prose-section">
+        <h2>5. CPI Integration Framework</h2>
+        <p>The RAPI is designed to augment the existing CPI (Combined) by providing a high-frequency price signal for the <em>Air Transport</em> item under the <strong>Transport &amp; Communication</strong> group.</p>
+
+        <h3>Current CPI Structure (Transport &amp; Communication)</h3>
+        <ul>
+          <li>Weight in CPI (Combined): 8.59%</li>
+          <li>Air Transport sub-item current weight: ~0.21%</li>
+          <li>Current data collection frequency: Monthly (manual survey)</li>
+          <li>Proposed frequency with RAPI: Daily (automated)</li>
+        </ul>
+
+        <h3>Integration Method</h3>
+        <p>The monthly CPI figure for Air Transport will be computed as the simple average of the 30 daily RAPI values, reducing the lag between price changes and their reflection in official inflation statistics from ~4 weeks to near real-time.</p>
+
+        <div class="formula-box">
+          CPI_AirTransport<sub>month m</sub> = (1/n) × Σ RAPI<sub>d</sub>  for d ∈ month m
+
+          Where n = number of valid RAPI observations in month m
+        </div>
+      </div>
+
+      <!-- 6. QUALITY ASSURANCE -->
+      <div class="prose-section">
+        <h2>6. Quality Assurance &amp; Revision Policy</h2>
+        <h3>6.1 Quality Checks</h3>
+        <ul>
+          <li>Automated outlier detection (Z-score ≥ 3.0 flags fare for manual review)</li>
+          <li>Daily completeness check: minimum 80% of 52 routes must have valid observations</li>
+          <li>Weekly reconciliation against DGCA published average fare statistics</li>
+          <li>Monthly manual audit of 10% random sample of scraped records</li>
+        </ul>
+        <h3>6.2 Revision Policy</h3>
+        <p>Published daily index values are considered provisional for 7 days. Final values are locked after the 7-day review window. Any revision exceeding ±0.5 index points triggers a formal revision notice published on this portal.</p>
+        <h3>6.3 Transparency</h3>
+        <p>All source data (anonymized), scraping logs, validation reports, and index calculation files are archived and available for download from the Data Explorer section under the Open Data policy of the Government of India.</p>
+      </div>
+
+      <!-- 7. REFERENCES -->
+      <div class="prose-section">
+        <h2>7. References &amp; Standards</h2>
+        <ul>
+          <li>ILO/IMF/OECD/UNECE/World Bank (2004). <em>Consumer Price Index Manual: Theory and Practice</em>. Geneva: ILO.</li>
+          <li>MoSPI (2015). <em>CPI (Combined) — Base Year 2012 Methodology Document</em>. New Delhi: CSO.</li>
+          <li>DGCA (Annual). <em>Indian Civil Aviation Statistics</em>. Ministry of Civil Aviation, Government of India.</li>
+          <li>Eurostat (2017). <em>Methodology for Compiling Air Passenger Transport Statistics</em>. Luxembourg: Publications Office.</li>
+          <li>RBI (2020). <em>Handbook of Statistics on the Indian Economy</em>. Mumbai: Reserve Bank of India.</li>
+        </ul>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="container footer-top-inner">
+        <div class="footer-col">
+          <h4>About the Portal</h4>
+          <p>Real-Time Airfare Price Index developed under SIH 2026 (Problem No. SIH26056) in collaboration with MoSPI.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/explorer">Data Explorer</a></li>
+            <li><a href="/methodology">Methodology</a></li>
+            <li><a href="#">API Access</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Related Portals</h4>
+          <ul>
+            <li><a href="https://mospi.gov.in" target="_blank" rel="noopener">MoSPI Official Website</a></li>
+            <li><a href="https://sih.gov.in" target="_blank" rel="noopener">Smart India Hackathon</a></li>
+            <li><a href="https://data.gov.in" target="_blank" rel="noopener">Open Government Data</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <address>
+            <p>Ministry of Statistics &amp; Programme Implementation</p>
+            <p>Sardar Patel Bhawan, New Delhi – 110001</p>
+            <p>📧 airindex@mospi.gov.in</p>
+          </address>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>© 2026 Ministry of Statistics &amp; Programme Implementation, Government of India. All Rights Reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Terms &amp; Conditions</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Disclaimer</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

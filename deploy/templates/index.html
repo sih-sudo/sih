@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Airfare Price Index — MoSPI | SIH 2026</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── TOP STRIP ── -->
+<div class="top-strip">
+  <div class="wrap top-strip-inner">
+    <div class="ts-left">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="" class="emblem-sm"/>
+      <span data-i18n="txt-gov-name">Government of India &nbsp;|&nbsp; Ministry of Statistics &amp; Programme Implementation</span>
+    </div>
+    <div class="ts-right">
+      <button class="ts-btn" onclick="changeFontSize(1)">A+</button>
+      <button class="ts-btn" onclick="changeFontSize(0)">A</button>
+      <button class="ts-btn" onclick="changeFontSize(-1)">A−</button>
+      <span class="ts-div">|</span>
+      <button class="lang-btn active" id="lang-en" onclick="switchLang('en')">EN</button>
+      <button class="lang-btn" id="lang-hi" onclick="switchLang('hi')">हि</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="wrap header-row">
+    <div class="header-left">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem" class="emblem-lg"/>
+      <div>
+        <h1 class="site-title" data-i18n="txt-site-title">Real-Time Airfare Price Index</h1>
+        <p class="site-sub" data-i18n="txt-site-subtitle">Ministry of Statistics &amp; Programme Implementation · Govt of India</p>
+        <p class="site-tag" data-i18n="txt-site-tag">CPI Augmentation · SIH 2026 · Problem No. 26056</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="di-badge"><span class="di-a">Digital</span><span class="di-b">India</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── TRICOLOR ── -->
+<div class="tricolor"><div></div><div></div><div></div></div>
+
+<!-- ── NAV ── -->
+<nav class="nav" aria-label="Main">
+  <div class="wrap nav-inner">
+    <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+    <ul class="nav-list" id="nav-list">
+      <li><a href="/" class="active" data-i18n="nav-home">Home</a></li>
+      <li><a href="/explorer" data-i18n="nav-explorer">Data Explorer</a></li>
+      <li><a href="/methodology" data-i18n="nav-methodology">Methodology</a></li>
+      <li><a href="#search-section" data-i18n="nav-search">Fare Search</a></li>
+      <li><a href="#charts" data-i18n="nav-charts">Analytics</a></li>
+      <li><a href="#about" data-i18n="nav-about">About</a></li>
+      <li><a href="#footer" data-i18n="nav-contact">Contact</a></li>
+    </ul>
+    <div class="nav-status">
+      <span class="status-dot"></span>
+      <span class="status-label">Live · Updated <span id="last-update">07 Sep 2026</span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <span class="ticker-tag">📢</span>
+  <div class="ticker-viewport">
+    <span class="ticker-text" id="ticker-text">
+      NAI updated 07-Sep-2026 06:00 IST &nbsp;·&nbsp; National Airfare Index: <strong>142.7</strong> &nbsp;·&nbsp; MoM +2.3% &nbsp;·&nbsp; DEL–BOM highest: +4.1% &nbsp;·&nbsp; 6 airlines · 4 OTA portals · 52 routes &nbsp;·&nbsp; Next update: 08-Sep-2026 06:00 IST &nbsp;&nbsp;&nbsp;
+      NAI updated 07-Sep-2026 06:00 IST &nbsp;·&nbsp; National Airfare Index: <strong>142.7</strong> &nbsp;·&nbsp; MoM +2.3% &nbsp;·&nbsp; DEL–BOM highest: +4.1% &nbsp;·&nbsp; 6 airlines · 4 OTA portals · 52 routes &nbsp;·&nbsp; Next update: 08-Sep-2026 06:00 IST
+    </span>
+  </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<main id="main">
+
+  <!-- ── HERO STAT BAND ── -->
+  <section class="hero-band">
+    <div class="wrap hero-grid">
+      <div class="hero-main">
+        <div class="hero-label" data-i18n="kpi-nai-label">National Airfare Index</div>
+        <div class="hero-value" id="kpi-nai">—</div>
+        <div class="hero-base">Base Year 2016 = 100</div>
+        <div class="hero-badges">
+          <span class="hb green" id="hero-mom">▲ —</span>
+          <span class="hb blue">Sep 2026</span>
+          <span class="hb saffron">52 Routes</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hstat-val" id="kpi-al">6</div>
+          <div class="hstat-lbl" data-i18n="kpi-airlines-label">Airlines</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="kpi-ota">4</div>
+          <div class="hstat-lbl" data-i18n="kpi-ota-label">OTA Portals</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val" id="kpi-routes">52</div>
+          <div class="hstat-lbl" data-i18n="kpi-routes-label">Route Pairs</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-val">+0.18%</div>
+          <div class="hstat-lbl" data-i18n="kpi-cpi-label">CPI Weight</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SEARCH ── -->
+  <section class="search-band" id="search-section">
+    <div class="wrap">
+      <div class="search-title">
+        <h2 data-i18n="search-heading">Search Live Fares</h2>
+        <p data-i18n="search-sub">Real-time fare data across airlines and booking windows</p>
+      </div>
+      <div class="search-form">
+        <div class="sf-row">
+          <div class="sf-field">
+            <label data-i18n="lbl-from">From</label>
+            <div class="sf-input-wrap">
+              <input id="s-from" type="text" placeholder="e.g. DEL" maxlength="3"
+                     list="airport-list" autocomplete="off"
+                     oninput="this.value=this.value.toUpperCase()"/>
+            </div>
+          </div>
+          <button class="sf-swap" onclick="swapAirports()" title="Swap">⇄</button>
+          <div class="sf-field">
+            <label data-i18n="lbl-to">To</label>
+            <div class="sf-input-wrap">
+              <input id="s-to" type="text" placeholder="e.g. BOM" maxlength="3"
+                     list="airport-list" autocomplete="off"
+                     oninput="this.value=this.value.toUpperCase()"/>
+            </div>
+          </div>
+          <div class="sf-field">
+            <label data-i18n="lbl-date">Date</label>
+            <div class="sf-input-wrap">
+              <input id="s-date" type="date"/>
+            </div>
+          </div>
+          <div class="sf-field">
+            <label data-i18n="lbl-class">Class</label>
+            <div class="sf-input-wrap">
+              <select id="s-class">
+                <option value="Economy">Economy</option>
+                <option value="Business">Business</option>
+              </select>
+            </div>
+          </div>
+          <div class="sf-field">
+            <label data-i18n="lbl-window">Booking Window</label>
+            <div class="sf-input-wrap">
+              <select id="s-window">
+                <option value="1">1 day ahead</option>
+                <option value="7">7 days ahead</option>
+                <option value="14" selected>14 days ahead</option>
+                <option value="30">30 days ahead</option>
+                <option value="60">60 days ahead</option>
+              </select>
+            </div>
+          </div>
+          <div class="sf-actions">
+            <button class="sf-search" onclick="doSearch()" data-i18n="btn-search">Search</button>
+            <button class="sf-clear" onclick="clearSearch()">Clear</button>
+          </div>
+        </div>
+      </div>
+      <datalist id="airport-list">
+        <option value="DEL"/><option value="BOM"/><option value="BLR"/>
+        <option value="MAA"/><option value="HYD"/><option value="CCU"/>
+        <option value="GOI"/><option value="JAI"/><option value="PNQ"/>
+        <option value="AMD"/><option value="COK"/><option value="LKO"/>
+        <option value="IXC"/><option value="GAU"/><option value="VNS"/>
+      </datalist>
+
+      <!-- Results -->
+      <div id="search-out" class="search-out hidden">
+        <div class="search-out-header">
+          <span id="search-route-label" class="search-route-label"></span>
+          <span id="search-count" class="search-count"></span>
+        </div>
+        <p id="search-empty" class="search-empty hidden">No fares found for this route. Try a different origin or destination.</p>
+        <div class="results-table-wrap">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Airline</th><th>Type</th><th>Class</th>
+                <th>Window</th><th>Fare</th><th>Index</th><th>Rating</th>
+              </tr>
+            </thead>
+            <tbody id="search-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CHARTS SECTION ── -->
+  <section class="charts-section" id="charts">
+    <div class="wrap">
+
+      <!-- Row 1 -->
+      <div class="charts-row-main">
+        <div class="chart-block wide">
+          <div class="cb-header">
+            <div>
+              <h3 data-i18n="chart-nai-title">National Airfare Index — Monthly Trend</h3>
+              <p class="cb-sub">Base year 2016 = 100 · 12-month series</p>
+            </div>
+            <div class="cb-controls">
+              <button class="cctrl active" onclick="setRange('3m',this)">3M</button>
+              <button class="cctrl" onclick="setRange('6m',this)">6M</button>
+              <button class="cctrl" onclick="setRange('1y',this)">1Y</button>
+              <button class="cctrl sma" id="sma-btn" onclick="toggleSMA(this)">SMA</button>
+            </div>
+          </div>
+          <canvas id="naiChart" height="90"></canvas>
+        </div>
+        <div class="charts-col-right">
+          <div class="chart-block">
+            <div class="cb-header"><h3 data-i18n="chart-routes-title">Top Routes</h3></div>
+            <canvas id="routeChart" height="140"></canvas>
+          </div>
+          <div class="chart-block">
+            <div class="cb-header"><h3 data-i18n="chart-airline-title">Airline Index</h3></div>
+            <canvas id="airlineChart" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="charts-row-two">
+        <div class="chart-block">
+          <div class="cb-header">
+            <div>
+              <h3 data-i18n="chart-elasticity-title">Lead Time Elasticity</h3>
+              <p class="cb-sub" data-i18n="chart-elasticity-sub">Fare index vs days before departure</p>
+            </div>
+            <select class="cb-route-select" id="elasticity-route" onchange="loadElasticityChart()">
+              <option value="DEL-BOM">DEL → BOM</option>
+              <option value="DEL-BLR">DEL → BLR</option>
+              <option value="BOM-MAA">BOM → MAA</option>
+              <option value="BOM-GOI">BOM → GOI</option>
+              <option value="DEL-HYD">DEL → HYD</option>
+            </select>
+          </div>
+          <canvas id="elasticityChart" height="130"></canvas>
+        </div>
+        <div class="chart-block">
+          <div class="cb-header">
+            <div>
+              <h3 data-i18n="chart-farecomp-title">Fare Components</h3>
+              <p class="cb-sub" data-i18n="chart-farecomp-sub">Base · Fuel · Airport · GST by booking window</p>
+            </div>
+            <select class="cb-route-select" id="farecomp-route" onchange="loadFareComponentChart()">
+              <option value="DEL-BOM">DEL → BOM</option>
+              <option value="DEL-BLR">DEL → BLR</option>
+              <option value="BOM-MAA">BOM → MAA</option>
+              <option value="BOM-GOI">BOM → GOI</option>
+            </select>
+          </div>
+          <canvas id="fareCompChart" height="130"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── ROUTE TABLE ── -->
+  <section class="data-section" id="route-section">
+    <div class="wrap">
+      <div class="ds-header">
+        <h2 data-i18n="tbl-route-heading">Route-wise Airfare Index</h2>
+        <div class="ds-controls">
+          <input type="search" id="route-search" placeholder="Filter routes…" oninput="filterRouteTable()"/>
+          <button class="ds-export" onclick="exportCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="route-table">
+          <thead>
+            <tr>
+              <th onclick="sortRouteTable(0)">Route</th>
+              <th onclick="sortRouteTable(1)">From</th>
+              <th onclick="sortRouteTable(2)">To</th>
+              <th onclick="sortRouteTable(3)">Index ↕</th>
+              <th onclick="sortRouteTable(4)">Avg Fare</th>
+              <th onclick="sortRouteTable(5)">MoM</th>
+              <th onclick="sortRouteTable(6)">YoY</th>
+              <th>Tier</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="route-tbody">
+            <tr><td colspan="9" class="loading-row">Loading live data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AIRLINE TABLE ── -->
+  <section class="data-section alt" id="airline-section">
+    <div class="wrap">
+      <div class="ds-header">
+        <h2 data-i18n="tbl-airline-heading">Airline-wise Airfare Index</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="airline-table">
+          <thead>
+            <tr>
+              <th>Airline</th><th>Type</th><th>Market Share</th>
+              <th>Index</th><th>MoM</th><th>YoY</th><th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="airline-tbody">
+            <tr><td colspan="7" class="loading-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section class="about-section" id="about">
+    <div class="wrap">
+      <h2 class="about-heading">About This Index</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="ac-icon">🎯</div>
+          <h3 data-i18n="info-obj-title">Objective</h3>
+          <p data-i18n="info-obj-body">Develop a real-time Airfare Price Index for India by automated web scraping of airline and OTA portals to augment the existing Consumer Price Index (CPI) with an Air Transport sub-component.</p>
+        </div>
+        <div class="about-card">
+          <div class="ac-icon">🏛️</div>
+          <h3 data-i18n="info-min-title">Sponsoring Ministry</h3>
+          <p data-i18n="info-min-body">MoSPI — Ministry of Statistics &amp; Programme Implementation, Government of India. This index will directly feed into the CPI calculation framework managed by MoSPI.</p>
+        </div>
+        <div class="about-card">
+          <div class="ac-icon">📊</div>
+          <h3 data-i18n="info-data-title">Data Collection</h3>
+          <p data-i18n="info-data-body">Automated scrapers collect fare data from 6 domestic airlines and 4 OTA platforms (MakeMyTrip, Cleartrip, Ixigo, EaseMyTrip) on a 24-hour cycle covering 52 route pairs across India.</p>
+        </div>
+        <div class="about-card">
+          <div class="ac-icon">🔬</div>
+          <h3 data-i18n="info-index-title">Index Construction</h3>
+          <p data-i18n="info-index-body">Laspeyres-type formula, base year 2016=100. Fares normalized by cabin, booking window and seasonality. Routes weighted by DGCA annual passenger traffic data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer class="footer" id="footer">
+  <div class="wrap footer-grid">
+    <div class="fc">
+      <h4 data-i18n="footer-about-heading">About the Portal</h4>
+      <p data-i18n="footer-about-body">Real-Time Airfare Price Index developed under Smart India Hackathon 2026 (SIH26056) in collaboration with MoSPI.</p>
+      <div class="f-tags">
+        <span>SIH 2026</span><span>MoSPI</span><span>Open Data</span>
+      </div>
+    </div>
+    <div class="fc">
+      <h4 data-i18n="footer-links-heading">Quick Links</h4>
+      <ul>
+        <li><a href="/" data-i18n="ql-home">Home</a></li>
+        <li><a href="/explorer" data-i18n="ql-explorer">Data Explorer</a></li>
+        <li><a href="/methodology" data-i18n="ql-methodology">Methodology</a></li>
+        <li><a href="#" data-i18n="ql-api">API Access</a></li>
+        <li><a href="#" data-i18n="ql-opendata">Open Data</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4 data-i18n="footer-related-heading">Related Portals</h4>
+      <ul>
+        <li><a href="https://mospi.gov.in" target="_blank" rel="noopener" data-i18n="rp-mospi">MoSPI Official</a></li>
+        <li><a href="https://sih.gov.in" target="_blank" rel="noopener" data-i18n="rp-sih">Smart India Hackathon</a></li>
+        <li><a href="https://digitalindia.gov.in" target="_blank" rel="noopener" data-i18n="rp-digitalindia">Digital India</a></li>
+        <li><a href="https://data.gov.in" target="_blank" rel="noopener" data-i18n="rp-ogd">Open Govt Data</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4 data-i18n="footer-contact-heading">Contact</h4>
+      <address>
+        <p data-i18n="footer-address1">Ministry of Statistics &amp; PI</p>
+        <p data-i18n="footer-address2">Sardar Patel Bhawan, Sansad Marg</p>
+        <p data-i18n="footer-address3">New Delhi – 110001</p>
+        <p data-i18n="footer-email">📧 airindex@mospi.gov.in</p>
+        <p data-i18n="footer-phone">📞 011-23074696</p>
+      </address>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span data-i18n="footer-copyright">© 2026 MoSPI, Government of India. All Rights Reserved.</span>
+    <span class="f-links">
+      <a href="#" data-i18n="footer-terms">Terms</a>
+      <a href="#" data-i18n="footer-privacy">Privacy</a>
+      <a href="#" data-i18n="footer-disclaimer">Disclaimer</a>
+    </span>
+  </div>
+</footer>
+
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+<script>
+function swapAirports(){
+  const a=document.getElementById('s-from'), b=document.getElementById('s-to');
+  [a.value,b.value]=[b.value,a.value];
+}
+function toggleNav(){
+  document.getElementById('nav-list').classList.toggle('open');
+}
+window.addEventListener('scroll',()=>{
+  document.getElementById('btt').classList.toggle('show', window.scrollY>400);
+});
+</script>
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
